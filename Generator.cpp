@@ -94,7 +94,6 @@ bool Generator::placeThing(const char id)
             {
                 rooms.emplace_back(id, i, j, width, height, rg);
                 rooms[rooms.size() - 1].fill(grid);
-                //grid.fill(i, j, width, height, gap, id + '0');
                 return true;
             }
         }

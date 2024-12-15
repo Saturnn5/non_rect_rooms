@@ -1,5 +1,28 @@
 #include "Room.h"
 
+
+void Room::drawLine(const bool isVert, std::pair<int, int>* wall, std::pair<int, int>* next, TwoDArray& grid) const
+{
+    if (isVert)
+    {
+        int start = std::min(wall->first, next->first);
+        int end = std::max(wall->first, next->first);
+        for (int i = start; i <= end; i++)
+        {
+            grid.set(i, wall->second, id + '0');
+        }
+    }
+    else
+    {
+        int start = std::min(wall->second, next->second);
+        int end = std::max(wall->second, next->second);
+        for (int j = start; j <= end; j++)
+        {
+            grid.set(wall->first, j, id + '0');
+        }
+    }
+}
+
 void Room::reshapeL(RandomGenerator& rg)
 {
     int min_size = 3;
@@ -20,7 +43,8 @@ void Room::reshapeL(RandomGenerator& rg)
         newWalls.emplace_back(walls[1].first, c);
         newWalls.emplace_back(walls[2]);
         newWalls.emplace_back(walls[3]);
-    } else if (wall == 1)
+    }
+    else if (wall == 1)
     {
         newWalls.emplace_back(walls[0]);
         newWalls.emplace_back(walls[1]);
@@ -28,7 +52,8 @@ void Room::reshapeL(RandomGenerator& rg)
         newWalls.emplace_back(r, c);
         newWalls.emplace_back(r, walls[2].second);
         newWalls.emplace_back(walls[3]);
-    } else if (wall == 2)
+    }
+    else if (wall == 2)
     {
         newWalls.emplace_back(walls[0]);
         newWalls.emplace_back(walls[1]);
@@ -36,7 +61,8 @@ void Room::reshapeL(RandomGenerator& rg)
         newWalls.emplace_back(r, walls[2].second);
         newWalls.emplace_back(r, c);
         newWalls.emplace_back(walls[3].first, c);
-    } else if (wall == 3)
+    }
+    else if (wall == 3)
     {
         newWalls.emplace_back(walls[3].first, c);
         newWalls.emplace_back(r, c);
@@ -44,6 +70,95 @@ void Room::reshapeL(RandomGenerator& rg)
         newWalls.emplace_back(walls[1]);
         newWalls.emplace_back(walls[2]);
         newWalls.emplace_back(walls[3]);
+    }
+    walls = newWalls;
+}
+
+void Room::reshapeU(RandomGenerator& rg)
+{
+    //minimum interior width of indentation
+    //1 is added for calculations
+    int min_size = 3 + 1;
+    unsigned int wall = rg.getRandom(0, static_cast<int>(walls.size()) - 1);
+
+
+    while (min_size > (wall % 2 == 0 ? height : width) - min_size - min_size)
+    {
+        if (min_size <= 2)
+        {
+            return;
+        }
+        min_size--;
+    }
+
+    std::vector<std::pair<int, int>> newWalls;
+    if (wall == 0)
+    {
+        unsigned int c = rg.getRandom(0, static_cast<int>(width) - min_size - min_size) + col + min_size;
+        unsigned int r1 = rg.getRandom(0, static_cast<int>(height) - min_size - min_size - min_size);
+        unsigned int r2 = rg.getRandom(r1 + min_size, static_cast<int>(height) - min_size - min_size);
+        r1 += row + min_size;
+        r2 += row + min_size;
+
+        newWalls.emplace_back(walls[0]);
+        newWalls.emplace_back(r1, walls[0].second);
+        newWalls.emplace_back(r1, c);
+        newWalls.emplace_back(r2, c);
+        newWalls.emplace_back(r2, walls[0].second);
+        newWalls.emplace_back(walls[1]);
+        newWalls.emplace_back(walls[2]);
+        newWalls.emplace_back(walls[3]);
+    }
+    else if (wall == 1)
+    {
+        unsigned int r = rg.getRandom(0, static_cast<int>(height) - min_size - min_size) + row + min_size;
+        unsigned int c1 = rg.getRandom(0, static_cast<int>(width) - min_size - min_size - min_size);
+        unsigned int c2 = rg.getRandom(c1 + min_size, static_cast<int>(width) - min_size - min_size);
+        c1 += col + min_size;
+        c2 += col + min_size;
+
+        newWalls.emplace_back(walls[0]);
+        newWalls.emplace_back(walls[1]);
+        newWalls.emplace_back(walls[1].first, c1);
+        newWalls.emplace_back(r, c1);
+        newWalls.emplace_back(r, c2);
+        newWalls.emplace_back(walls[1].first, c2);
+        newWalls.emplace_back(walls[2]);
+        newWalls.emplace_back(walls[3]);
+    }
+    else if (wall == 2)
+    {
+        unsigned int c = rg.getRandom(0, static_cast<int>(width) - min_size - min_size) + col + min_size;
+        unsigned int r1 = rg.getRandom(0, static_cast<int>(height) - min_size - min_size - min_size);
+        unsigned int r2 = rg.getRandom(r1 + min_size, static_cast<int>(height) - min_size - min_size);
+        r1 += row + min_size;
+        r2 += row + min_size;
+
+        newWalls.emplace_back(walls[0]);
+        newWalls.emplace_back(walls[1]);
+        newWalls.emplace_back(walls[2]);
+        newWalls.emplace_back(r2, walls[2].second);
+        newWalls.emplace_back(r2, c);
+        newWalls.emplace_back(r1, c);
+        newWalls.emplace_back(r1, walls[2].second);
+        newWalls.emplace_back(walls[3]);
+    }
+    else if (wall == 3)
+    {
+        unsigned int r = rg.getRandom(0, static_cast<int>(height) - min_size - min_size) + row + min_size;
+        unsigned int c1 = rg.getRandom(0, static_cast<int>(width) - min_size - min_size - min_size);
+        unsigned int c2 = rg.getRandom(c1 + min_size, static_cast<int>(width) - min_size - min_size);
+        c1 += col + min_size;
+        c2 += col + min_size;
+
+        newWalls.emplace_back(walls[0]);
+        newWalls.emplace_back(walls[1]);
+        newWalls.emplace_back(walls[2]);
+        newWalls.emplace_back(walls[3]);
+        newWalls.emplace_back(walls[3].first, c2);
+        newWalls.emplace_back(r, c2);
+        newWalls.emplace_back(r, c1);
+        newWalls.emplace_back(walls[3].first, c1);
     }
     walls = newWalls;
 }
@@ -64,32 +179,17 @@ void Room::fill(TwoDArray& grid)
     drawLine(isVert, wall, &walls[0], grid);
 }
 
-void Room::drawLine(const bool isVert, std::pair<int, int>* wall, std::pair<int, int>* next, TwoDArray& grid)
-{
-    if (isVert)
-    {
-        int start = std::min(wall->first, next->first);
-        int end = std::max(wall->first, next->first);
-        for (int i = start; i <= end; i++)
-        {
-            grid.set(i, wall->second, id + '0');
-        }
-    } else
-    {
-        int start = std::min(wall->second, next->second);
-        int end = std::max(wall->second, next->second);
-        for (int j = start; j <= end; j++)
-        {
-            grid.set(wall->first, j, id + '0');
-        }
-    }
-}
-
 Room::Room(int id, int row, int col, int width, int height, RandomGenerator& rg) :
     id(id), row(row), col(col), width(width), height(height),
     walls({{row, col}, {row + height, col}, {row + height, col + width}, {row, col + width}})
 {
-    if (rg.getRandom(0, 100) > 75) {
+    int chance = rg.getRandom(0, 100);
+    if (chance > 75)
+    {
         reshapeL(rg);
+    }
+    else if (chance > 50)
+    {
+        reshapeU(rg);
     }
 }
