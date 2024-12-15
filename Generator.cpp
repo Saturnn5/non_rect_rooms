@@ -60,7 +60,7 @@ bool Generator::placeStuff()
     return true;
 }
 
-bool Generator::openSpace()
+bool Generator::openSpace() const
 {
     int max_s = 0;
     for (auto i = 0; i < size; i++)
@@ -92,7 +92,9 @@ bool Generator::placeThing(const char id)
         {
             if (grid.isEmpty(i, j, width, height, gap))
             {
-                grid.fill(i, j, width, height, gap, id + '0');
+                rooms.emplace_back(id, i, j, width, height, rg);
+                rooms[rooms.size() - 1].fill(grid);
+                //grid.fill(i, j, width, height, gap, id + '0');
                 return true;
             }
         }

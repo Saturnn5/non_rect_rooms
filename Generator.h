@@ -1,21 +1,22 @@
 #pragma once
+#include "Room.h"
 #include "TwoDArray.h"
 #include "Utils.h"
 
 class Generator
 {
     TwoDArray grid;
-
     const int size;
     const int room_min;
     const int room_max;
     const int gap;
     const int twoGap;
     RandomGenerator rg;
+    std::vector<Room> rooms;
 
     void round();
     bool placeStuff();
-    bool openSpace();
+    bool openSpace() const;
     bool placeThing(char id);
 
 public:

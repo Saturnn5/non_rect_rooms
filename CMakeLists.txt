@@ -7,4 +7,6 @@ add_executable(non_rect_rooms main.cpp
         Generator.cpp
         Generator.h
         TwoDArray.h
-        Utils.h)
+        Utils.h
+        Room.cpp
+        Room.h)
