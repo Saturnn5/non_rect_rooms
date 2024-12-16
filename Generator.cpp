@@ -1,14 +1,5 @@
 #include "Generator.h"
 
-Generator::Generator(const int size, const int room_min, const int room_max,
-                     const int gap, const int seed) :
-    grid(TwoDArray(size, size)), size(size), room_min(room_min),
-    room_max(room_max), gap(gap), twoGap(gap + gap), rg(RandomGenerator(seed))
-{
-}
-
-Generator::~Generator() = default;
-
 bool Generator::generate()
 {
     round();
@@ -54,7 +45,7 @@ bool Generator::placeStuff()
                 id++;
             };
 
-            std::cout<<grid<<std::endl;
+            std::cout<<*this<<std::endl;
         }
     }
     return true;
@@ -93,10 +84,19 @@ bool Generator::placeThing(const char id)
             if (grid.isEmpty(i, j, width, height, gap))
             {
                 rooms.emplace_back(id, i, j, width, height, rg);
-                rooms[rooms.size() - 1].fill(grid);
+                rooms[rooms.size() - 1].draw(grid);
                 return true;
             }
         }
     }
     return false;
 }
+
+Generator::Generator(const int size, const int room_min, const int room_max,
+                     const int gap, const int seed) :
+    grid(TwoDArray(size, size)), size(size), room_min(room_min),
+    room_max(room_max), gap(gap), twoGap(gap + gap), rg(RandomGenerator(seed))
+{
+}
+
+Generator::~Generator() = default;

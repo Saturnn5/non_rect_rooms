@@ -9,13 +9,14 @@ class TwoDArray
 {
     const int row;
     const int col;
+    int overflow;
     std::string data;
     const char empty;
     const std::set<char> nonBlocking = {'X'};
 
 public:
     TwoDArray(const int row, const int col, const char empty = '-') :
-        row(row), col(col), data(row * (col + 1), empty), empty(empty)
+        row(row), col(col), data(row * (col + 1), empty), empty(empty), overflow(10)
     {
         const int max = static_cast<int>(data.size());
         for (int i = col; i < max; i += col + 1)
@@ -39,11 +40,19 @@ public:
 
     void set(const int r, const int c, const char ch)
     {
+        if (overflow < 0)
+        {
+            return;
+        }
         if (r >= 0 && r < row && c >= 0 && c < col)
         {
             data[(row - r - 1) * (col + 1) + c] = ch;
         }
-        else { std::cout << "attempted to set out of bounds" << std::endl; }
+        else
+        {
+            std::cout << "attempted to set out of bounds" << std::endl;
+            overflow--;
+        }
     }
 
     [[nodiscard]] bool isEmpty(const int r, const int c, const int s, const int gap) const

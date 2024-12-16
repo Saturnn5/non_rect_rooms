@@ -12,12 +12,14 @@ class Room {
     unsigned int width;
     unsigned int height;
     std::vector<std::pair<int, int>> walls;
+    std::vector<std::pair<int, int>> interior_walls;
 
     void drawLine(bool isVert, std::pair<int, int>* wall, std::pair<int, int>* next, TwoDArray& grid) const;
     void reshapeL(RandomGenerator& rg);
     void reshapeU(RandomGenerator& rg);
+    void reshapeO(RandomGenerator& rg);
 
     public:
     Room(int id, int row, int col, int width, int height, RandomGenerator& rg);
-    void fill(TwoDArray& grid);
+    void draw(TwoDArray& grid);
 };
