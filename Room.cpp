@@ -205,6 +205,43 @@ void Room::reshapeO(RandomGenerator& rg)
     interior_walls = newWalls;
 }
 
+void Room::addDoors(RandomGenerator& rg)
+{
+    int perimeter_len = 0;
+    bool isVert = true;
+    std::pair<int, int>* wall = nullptr;
+    for (auto& next : walls)
+    {
+        if (wall)
+        {
+            perimeter_len += isVert ? std::abs(next.first - wall->first) : std::abs(next.second + wall->second);
+            isVert = !isVert;
+        }
+        wall = &next;
+    }
+
+    // ReSharper disable once CppDFANullDereference
+    perimeter_len += wall->first - walls[0].first;
+
+    //TODO: add doors to the exterior wall
+
+    unless(interior_walls.empty())
+    {
+        int interior_len = 0;
+        for (auto& next : interior_walls)
+        {
+            if (wall)
+            {
+                interior_len += isVert ? std::abs(next.first - wall->first) : std::abs(next.second + wall->second);
+                isVert = !isVert;
+            }
+            wall = &next;
+        }
+        interior_len += wall->first - walls[0].first;
+        //TODO: add doors to the interior wall
+    }
+}
+
 void Room::draw(TwoDArray& grid)
 {
     bool isVert = true;

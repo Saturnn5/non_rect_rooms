@@ -18,6 +18,7 @@ class Room {
     void reshapeL(RandomGenerator& rg);
     void reshapeU(RandomGenerator& rg);
     void reshapeO(RandomGenerator& rg);
+    void addDoors(RandomGenerator& rg);
 
     public:
     Room(int id, int row, int col, int width, int height, RandomGenerator& rg);
