@@ -10,7 +10,13 @@ void Room::drawLine(const bool isVert, std::pair<int, int>* wall, std::pair<int,
         int end = std::max(wall->first, next->first);
         for (int i = start; i <= end; i++)
         {
-            grid.set(i, wall->second, id + '0');
+            if (!doors.contains({i, wall->second}))
+            {
+                grid.set(i, wall->second, static_cast<char>('0' + id));
+            } else
+            {
+                grid.set(i, wall->second, '.');
+            }
         }
     }
     else
@@ -19,7 +25,13 @@ void Room::drawLine(const bool isVert, std::pair<int, int>* wall, std::pair<int,
         int end = std::max(wall->second, next->second);
         for (int j = start; j <= end; j++)
         {
-            grid.set(wall->first, j, id + '0');
+            if (!doors.contains({wall->first, j}))
+            {
+                grid.set(wall->first, j, static_cast<char>('0' + id));
+            } else
+            {
+                grid.set(wall->first, j, '.');
+            }
         }
     }
 }
@@ -100,7 +112,7 @@ void Room::reshapeU(RandomGenerator& rg)
     {
         unsigned int c = rg.getRandom(0, static_cast<int>(width) - min_size - min_size) + col + min_size;
         unsigned int r1 = rg.getRandom(0, static_cast<int>(height) - min_size - min_size - min_interior);
-        unsigned int r2 = rg.getRandom(r1 + min_interior, static_cast<int>(height) - min_size - min_size);
+        unsigned int r2 = rg.getRandom(static_cast<int>(r1) + min_interior, static_cast<int>(height) - min_size - min_size);
         r1 += row + min_size;
         r2 += row + min_size;
 
@@ -117,7 +129,7 @@ void Room::reshapeU(RandomGenerator& rg)
     {
         unsigned int r = rg.getRandom(0, static_cast<int>(height) - min_size - min_size) + row + min_size;
         unsigned int c1 = rg.getRandom(0, static_cast<int>(width) - min_size - min_size - min_interior);
-        unsigned int c2 = rg.getRandom(c1 + min_interior, static_cast<int>(width) - min_size - min_size);
+        unsigned int c2 = rg.getRandom(static_cast<int>(c1) + min_interior, static_cast<int>(width) - min_size - min_size);
         c1 += col + min_size;
         c2 += col + min_size;
 
@@ -134,7 +146,7 @@ void Room::reshapeU(RandomGenerator& rg)
     {
         unsigned int c = rg.getRandom(0, static_cast<int>(width) - min_size - min_size) + col + min_size;
         unsigned int r1 = rg.getRandom(0, static_cast<int>(height) - min_size - min_size - min_interior);
-        unsigned int r2 = rg.getRandom(r1 + min_interior, static_cast<int>(height) - min_size - min_size);
+        unsigned int r2 = rg.getRandom(static_cast<int>(r1) + min_interior, static_cast<int>(height) - min_size - min_size);
         r1 += row + min_size;
         r2 += row + min_size;
 
@@ -151,7 +163,7 @@ void Room::reshapeU(RandomGenerator& rg)
     {
         unsigned int r = rg.getRandom(0, static_cast<int>(height) - min_size - min_size) + row + min_size;
         unsigned int c1 = rg.getRandom(0, static_cast<int>(width) - min_size - min_size - min_interior);
-        unsigned int c2 = rg.getRandom(c1 + min_interior, static_cast<int>(width) - min_size - min_size);
+        unsigned int c2 = rg.getRandom(static_cast<int>(c1) + min_interior, static_cast<int>(width) - min_size - min_size);
         c1 += col + min_size;
         c2 += col + min_size;
 
@@ -189,9 +201,9 @@ void Room::reshapeO(RandomGenerator& rg)
     std::vector<std::pair<int, int>> newWalls;
 
     unsigned int c1 = rg.getRandom(0, static_cast<int>(width) - min_size - min_size - min_interior);
-    unsigned int c2 = rg.getRandom(c1 + min_interior, static_cast<int>(width) - min_size - min_size);
+    unsigned int c2 = rg.getRandom(static_cast<int>(c1) + min_interior, static_cast<int>(width) - min_size - min_size);
     unsigned int r1 = rg.getRandom(0, static_cast<int>(height) - min_size - min_size - min_interior);
-    unsigned int r2 = rg.getRandom(r1 + min_interior, static_cast<int>(height) - min_size - min_size);
+    unsigned int r2 = rg.getRandom(static_cast<int>(r1) + min_interior, static_cast<int>(height) - min_size - min_size);
     r1 += row + min_size;
     r2 += row + min_size;
     c1 += col + min_size;
@@ -207,33 +219,22 @@ void Room::reshapeO(RandomGenerator& rg)
 
 void Room::addDoors(RandomGenerator& rg)
 {
-    int wall_len = 0;
-    int door_x;
-    int door_y;
     bool isVert = true;
+    bool hasDoor = false;
     std::pair<int, int>* wall = nullptr;
     for (auto& next : walls)
     {
         if (wall)
         {
-            wall_len = (isVert ? std::abs(next.first - wall->first) : std::abs(next.second + wall->second)) - 1;
-
-            if (wall_len > 0)
-            {
-                for (int i = 0; i <= wall_len / 4; i++)
-                {
-                    if (rg.getRandom(0, 1) > 0)
-                    {
-                        door_x = isVert ? next.second : rg.getRandom(1, wall_len);
-                        door_y = isVert ? rg.getRandom(1, wall_len) : next.first;
-                    }
-                    //make a door
-                }
-            }
+            addDoorToWall(rg, isVert, next, wall, hasDoor);
             isVert = !isVert;
+            hasDoor = false;
         }
         wall = &next;
     }
+    addDoorToWall(rg, isVert, walls[0], &walls[walls.size() - 1], hasDoor);
+    isVert = !isVert;
+    hasDoor = false;
 
     unless(interior_walls.empty())
     {
@@ -241,23 +242,38 @@ void Room::addDoors(RandomGenerator& rg)
         {
             if (wall)
             {
-                wall_len = (isVert ? std::abs(next.first - wall->first) : std::abs(next.second + wall->second)) - 1;
-
-                if (wall_len > 0)
-                {
-                    for (int i = 0; i <= wall_len / 4; i++)
-                    {
-                        if (rg.getRandom(0, 1) > 0)
-                        {
-                            door_x = isVert ? next.second : rg.getRandom(1, wall_len);
-                            door_y = isVert ? rg.getRandom(1, wall_len) : next.first;
-                        }
-                        //make a door
-                    }
-                }
+                addDoorToWall(rg, isVert, next, wall, hasDoor);
                 isVert = !isVert;
+                hasDoor = false;
             }
             wall = &next;
+        }
+    }
+    addDoorToWall(rg, isVert, walls[0], &walls[walls.size() - 1], hasDoor);
+}
+
+void Room::addDoorToWall(RandomGenerator& rg, bool isVert, std::pair<int, int> next, std::pair<int, int>* wall, bool hasDoor)
+{
+    int wall_len;
+    int door_x;
+    int door_y;
+
+    int threshold = 4;
+
+    wall_len = (isVert ? std::abs(next.first - wall->first) : std::abs(next.second - wall->second)) - 1;
+
+    if (wall_len > 0)
+    {
+        for (int i = 0; i <= wall_len / threshold; i++)
+        {
+            if (rg.getRandom(0, 1) > 0  || (i == wall_len / threshold && !hasDoor))
+            {
+                door_y = isVert ? next.second : std::min(next.second, wall->second) + rg.getRandom(1, wall_len);
+                door_x = isVert ? std::min(next.first, wall->first) + rg.getRandom(1, wall_len): next.first;
+
+                doors.insert({door_x, door_y});
+                hasDoor = true;
+            }
         }
     }
 }
@@ -294,7 +310,7 @@ void Room::draw(TwoDArray& grid)
 
 Room::Room(int id, int row, int col, int width, int height, RandomGenerator& rg) :
     id(id), row(row), col(col), width(width), height(height),
-    walls({{row, col}, {row + height, col}, {row + height, col + width}, {row, col + width}}), interior_walls()
+    walls({{row, col}, {row + height, col}, {row + height, col + width}, {row, col + width}}), interior_walls(), doors()
 {
     int chance = rg.getRandom(0, 100);
     if (chance > 75)
@@ -309,4 +325,6 @@ Room::Room(int id, int row, int col, int width, int height, RandomGenerator& rg)
     {
         reshapeO(rg);
     }
+
+    addDoors(rg);
 }
