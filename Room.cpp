@@ -207,38 +207,58 @@ void Room::reshapeO(RandomGenerator& rg)
 
 void Room::addDoors(RandomGenerator& rg)
 {
-    int perimeter_len = 0;
+    int wall_len = 0;
+    int door_x;
+    int door_y;
     bool isVert = true;
     std::pair<int, int>* wall = nullptr;
     for (auto& next : walls)
     {
         if (wall)
         {
-            perimeter_len += isVert ? std::abs(next.first - wall->first) : std::abs(next.second + wall->second);
+            wall_len = (isVert ? std::abs(next.first - wall->first) : std::abs(next.second + wall->second)) - 1;
+
+            if (wall_len > 0)
+            {
+                for (int i = 0; i <= wall_len / 4; i++)
+                {
+                    if (rg.getRandom(0, 1) > 0)
+                    {
+                        door_x = isVert ? next.second : rg.getRandom(1, wall_len);
+                        door_y = isVert ? rg.getRandom(1, wall_len) : next.first;
+                    }
+                    //make a door
+                }
+            }
             isVert = !isVert;
         }
         wall = &next;
     }
 
-    // ReSharper disable once CppDFANullDereference
-    perimeter_len += wall->first - walls[0].first;
-
-    //TODO: add doors to the exterior wall
-
     unless(interior_walls.empty())
     {
-        int interior_len = 0;
         for (auto& next : interior_walls)
         {
             if (wall)
             {
-                interior_len += isVert ? std::abs(next.first - wall->first) : std::abs(next.second + wall->second);
+                wall_len = (isVert ? std::abs(next.first - wall->first) : std::abs(next.second + wall->second)) - 1;
+
+                if (wall_len > 0)
+                {
+                    for (int i = 0; i <= wall_len / 4; i++)
+                    {
+                        if (rg.getRandom(0, 1) > 0)
+                        {
+                            door_x = isVert ? next.second : rg.getRandom(1, wall_len);
+                            door_y = isVert ? rg.getRandom(1, wall_len) : next.first;
+                        }
+                        //make a door
+                    }
+                }
                 isVert = !isVert;
             }
             wall = &next;
         }
-        interior_len += wall->first - walls[0].first;
-        //TODO: add doors to the interior wall
     }
 }
 
