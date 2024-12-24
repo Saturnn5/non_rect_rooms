@@ -95,7 +95,7 @@ bool Generator::placeThing(const char id)
 Generator::Generator(const int size, const int room_min, const int room_max,
                      const int gap, const int seed) :
     grid(TwoDArray(size, size)), size(size), room_min(room_min),
-    room_max(room_max), gap(gap), twoGap(gap + gap), rg(RandomGenerator(seed))
+    room_max(room_max), gap(gap), rg(RandomGenerator(seed))
 {
 }
 

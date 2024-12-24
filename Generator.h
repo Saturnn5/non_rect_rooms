@@ -10,7 +10,6 @@ class Generator
     const int room_min;
     const int room_max;
     const int gap;
-    const int twoGap;
     RandomGenerator rg;
     std::vector<Room> rooms;
 
